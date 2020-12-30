@@ -1,0 +1,58 @@
+service: aws-schedule-crawler-flight-tickets
+
+frameworkVersion: '2'
+
+plugins:
+  - serverless-vpc-plugin
+  - serverless-offline
+  - serverless-dynamodb-local
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: us-east-1
+  environment:
+    tableName: ${self:custom.tableName}
+    siteURL: ${self:custom.siteURL}
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+      Resource: "arn:aws:dynamodb:${self:provider.region}:*:table/${self:custom.tableName}"
+
+custom:
+  vpcConfig:
+    cidrBlock: '173.31.0.0/16'
+    createNatGateway: 1
+    zones:
+      - us-east-1a
+      - us-east-1b
+  schedulerRate: rate(12 hours)
+  tableName: flight-tickets
+  siteURL: https://www.viajanet.com.br/passagens-aereas/quandoviajar
+
+functions:
+  schedule-flight-tickets:
+    handler: handler.scheduler
+    events:
+      - schedule:
+          rate: ${self:custom.schedulerRate}
+          name: schedule-flight-tickets
+          description: get flight ticket price each minute
+          enabled: true
+
+resources:
+ Resources:
+   MyDynamoDBTable:
+     Type: AWS::DynamoDB::Table
+     Properties:
+       TableName: ${self:custom.tableName}
+       AttributeDefinitions:
+          - AttributeName: ID
+            AttributeType: S
+       KeySchema:
+          - AttributeName: ID
+            KeyType: HASH
+       ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1

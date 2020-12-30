@@ -1,0 +1,28 @@
+{
+  "name": "aws-schedule-crawler-flight-tickets",
+  "description": "",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "ISC",
+  "author": "Antônio Junior <acsjunior1@gmail.com>",
+  "scripts": {
+    "start": "node index.js",
+    "prestart": "npm install"
+  },
+  "keywords": [],
+  "engines": {
+    "node": ">= 4.4.7",
+    "npm": ">= 2.15.8"
+  },
+  "devDependencies": {
+    "chrome-launcher": "^0.13.4",
+    "serverless-dynamodb-local": "^0.2.39",
+    "serverless-offline": "^6.8.0",
+    "serverless-vpc-plugin": "^1.0.1"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.5",
+    "chrome-aws-lambda": "^5.5.0",
+    "puppeteer-core": "^5.5.0"
+  }
+}
