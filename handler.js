@@ -9,32 +9,18 @@ const util = require("util");
 const extractHtml = async page => {
   const mainHtml = await page.evaluate(
     el => el.innerHTML,
-    await page.$(".cards-price-cia")
+    await page.$(".FlightsHotelsSwitchWrapper")
   );
 
   const $ = cheerio.load(mainHtml);
 
-  const names = [];
-  const dates = [];
-  const prices = [];
+  let price = 0;
 
-  $(".cards-price-cia__card-cia__name").each((i, element) =>
-    names.push($(element).text())
-  );
-  $(".cards-price-cia__card-cia__flight-date").each((i, element) =>
-    dates.push($(element).text())
-  );
-  $(".cards-price-cia__card-cia__price").each((i, element) =>
-    prices.push($(element).text())
-  );
+  $(".FlightsHotelsSwitchTabPrice > span > div").each((i, element) => {
+    price = $(element).text();
+  });
 
-  const cardsInfo = names.map((name, index) => ({
-    name,
-    date: dates[index].replace(/\n\n\n\n/g, ' - ').replace(/[\n]/g, ''),
-    price: prices[index]
-  }));
-
-  return cardsInfo;
+  return price;
 };
 
 module.exports.scheduler = async event => {
@@ -42,9 +28,7 @@ module.exports.scheduler = async event => {
     "Reading options from event:\n",
     util.inspect(event, { depth: 5 })
   );
-  //const siteUrl = "https://www.skyscanner.com.br/transport/flights/REC/POA?oym=2103&iym=2103&selectedoday=01&selectediday=01"
-  const siteUrl =
-  "https://www.viajanet.com.br/passagens-aereas/quandoviajar/REC/POA";
+  const siteUrl = "https://www.skyscanner.com.br/transport/flights/REC/POA?oym=2103&iym=2103&selectedoday=01&selectediday=01"
   let browser = null;
   try {
     browser = await chromium.puppeteer.launch({
@@ -58,7 +42,9 @@ module.exports.scheduler = async event => {
     const page = await browser.newPage();
 
     await page.goto(siteUrl, ["load", "domcontentloaded", "networkidle0"]);
-console.log(await page.title())
+    
+    console.log(await page.title())
+    
     const featuresList = await extractHtml(page);
 
     console.log(featuresList);
